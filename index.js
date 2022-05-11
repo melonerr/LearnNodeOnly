@@ -1,16 +1,18 @@
 // import 
-const http = require('http');
 var file = require('./module/uploadfile_module');
-var mail = require('./module/mailer_module');
 var mysql = require('./module/mysql_module');
 var MongoDB = require('./module/MongoDB_module');
+
+const msSQL = require("mssql");
 const express = require('express');
+
 const app = express();
 
 //
 var ContentTypeJson = 'application/json';
 var ContentTypeHTML = 'text/html';
 var MongoURL = "mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false";
+
 const port = 3000;
 // View engine setup
 app.set('view engine', 'ejs')
@@ -154,6 +156,35 @@ app.get('/monLimit', (req, res) => {
     var Data = MongoDB.MongoLimit(MongoURL, 5);
     res.write(Data);
     return res.end();
+});
+
+app.get('/mssql/connect', (req, res) => {
+
+    var sql = require("mssql");
+    var config = {
+        user: 'root',
+        password: '1234',
+        server: 'localhost',
+        database: 'learnnode'
+    };
+    // connect to your database
+    sql.connect(config, function(err) {
+
+        if (err) console.log(err);
+
+        // create Request object
+        var request = new sql.Request();
+
+        // query to the database and get the records
+        request.query('select * from t1', function(err, recordset) {
+
+            if (err) console.log(err)
+
+            // send records as a response
+            res.send(recordset);
+
+        });
+    });
 });
 
 app.listen(port, () => {
