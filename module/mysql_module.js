@@ -119,7 +119,7 @@ exports.MySQLWhereLike = (Table, Column, Data) => {
     conDB.connect((err) => {
         if (err) throw err;
         console.log("Connected!");
-        var sql = `SELECT * FROM ${Table} WHERE ${Column} = '%${Data}%'`;
+        var sql = `SELECT * FROM ${Table} WHERE ${Column} LIKE '%${Data}%'`;
         conDB.query(sql, (err, result) => {
             if (err) throw err;
             console.log(result);
@@ -160,23 +160,7 @@ exports.MySQLUpdate = (Table, Column, Data, id) => {
         });
     });
 };
-exports.MySQLLimit = (Table, Limit) => {
-    const conDB = mysql.createConnection({
-        host: "localhost",
-        user: "root",
-        password: "",
-        database: "learnnode"
-    });
-    conDB.connect((err) => {
-        if (err) throw err;
-        console.log("Connected!");
-        var sql = `SELECT * FROM ${Table} LIMIT ${Limit}`;
-        conDB.query(sql, (err, result) => {
-            if (err) throw err;
-            console.log(result);
-        });
-    });
-};
+
 exports.MySQLJoin = () => {
     const conDB = mysql.createConnection({
         host: "localhost",

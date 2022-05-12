@@ -1,19 +1,22 @@
 // import 
-var file = require('./module/uploadfile_module');
-var mysql = require('./module/mysql_module');
-var MongoDB = require('./module/MongoDB_module');
 
-const msSQL = require("mssql");
 const express = require('express');
-
 const app = express();
 
-//
+var file = require('./module/uploadfile_module');
+var mysql = require('./module/mysql_module');
+var msSQL = require("./module/mssql_module.js");
+var MongoDB = require('./module/MongoDB_module');
+var firestore = require('./module/firestore');
+const { json } = require('body-parser');
+
+
+// config
 var ContentTypeJson = 'application/json';
 var ContentTypeHTML = 'text/html';
 var MongoURL = "mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false";
-
 const port = 3000;
+
 // View engine setup
 app.set('view engine', 'ejs')
 app.get('/', (req, res) => {
@@ -159,33 +162,74 @@ app.get('/monLimit', (req, res) => {
 });
 
 app.get('/mssql/connect', (req, res) => {
-
-    var sql = require("mssql");
-    var config = {
-        user: 'root',
-        password: '1234',
-        server: 'localhost',
-        database: 'learnnode'
-    };
-    // connect to your database
-    sql.connect(config, function(err) {
-
-        if (err) console.log(err);
-
-        // create Request object
-        var request = new sql.Request();
-
-        // query to the database and get the records
-        request.query('select * from t1', function(err, recordset) {
-
-            if (err) console.log(err)
-
-            // send records as a response
-            res.send(recordset);
-
-        });
-    });
+    res.writeHead(200, { 'Content-Type': ContentTypeHTML });
+    var Data = msSQL.MsSQLConnect();
+    res.write(Data);
+    return res.end();
 });
+
+app.get('/mssql/create-table', (req, res) => {
+    res.writeHead(200, { 'Content-Type': ContentTypeHTML });
+    var Data = msSQL.MsSQLCreateTable('t2', 'ID INT NOT NULL IDENTITY(1, 1),name NVARCHAR (100) NULL,address NVARCHAR (100) NULL,PRIMARY KEY (ID)');
+    res.write(Data);
+    return res.end();
+});
+
+app.get('/mssql/drop-table', (req, res) => {
+    res.writeHead(200, { 'Content-Type': ContentTypeHTML });
+    var Data = msSQL.MsSQLDropTable('t2');
+    res.write(Data);
+    return res.end();
+});
+
+app.get('/mssql/insert', (req, res) => {
+    res.writeHead(200, { 'Content-Type': ContentTypeHTML });
+    var Data = msSQL.MsSQLInsert('t1', 'id, name, role', "'5', 'now', '2'");
+    res.write(Data);
+    return res.end();
+});
+
+app.get('/mssql/select', (req, res) => {
+    msSQL.MsSQLSelect('t1');
+    return res.end();
+});
+
+app.get('/mssql/where', (req, res) => {
+    msSQL.MsSQLWhere('t1', 'role', '=', '1');
+    return res.end();
+});
+
+app.get('/mssql/where-like', (req, res) => {
+    msSQL.MsSQLWhereLike('t1', 'name', '%k%');
+    return res.end();
+});
+
+app.get('/mssql/update', (req, res) => {
+    var Data = msSQL.MsSQLUpdate('t1', 'name', 'jira', 1);
+    res.write(Data);
+    return res.end();
+});
+
+app.get('/mssql/delete', (req, res) => {
+    var Data = msSQL.MsSQLDelete('t1', 'id', '5');
+    res.write(Data);
+    return res.end();
+});
+
+app.get('/mssql/top', async(req, res) => {
+    res.writeHead(200, { 'Content-Type': ContentTypeJson });
+    const data = await msSQL.MsSQLTop('t1', 2)
+    res.write(JSON.stringify(data));
+    return res.end();
+});
+
+app.get('/firebase/get', async(req, res) => {
+    res.writeHead(200, { 'Content-Type': ContentTypeJson });
+    const data = await firestore.GetData('cities');
+    res.write(JSON.stringify(data));
+    return res.end();
+});
+
 
 app.listen(port, () => {
     console.log(`Listening at http://localhost:${port}`);
