@@ -219,7 +219,7 @@ app.get('/mssql/delete', (req, res) => {
 app.get('/mssql/top', async(req, res) => {
     res.writeHead(200, { 'Content-Type': ContentTypeJson });
     const data = await msSQL.MsSQLTop('t1', 2)
-    res.write(JSON.stringify(data));
+        // res.write(JSON.stringify(data));
     return res.end();
 });
 
